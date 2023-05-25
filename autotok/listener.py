@@ -45,6 +45,8 @@ class AutoTokClient(TikTokLiveClient):
 
 
     def terminate(self) -> None:
+        print("Stopping...")
+
         try:
             self.stop_download()
         except Exception as e:
@@ -53,10 +55,14 @@ class AutoTokClient(TikTokLiveClient):
         self.stop()
 
         if self.upload:
-            upload_to_youtube(
+            print("Uploading to YouTube...")
+
+            video_id = upload_to_youtube(
                 video_path=self.download_path,
                 **self.youtube_kwargs
             )
+
+            print(f"Video ID `{video_id}` was uploaded successfuly: https://youtube.com/watch?v={video_id}")
 
 
     async def on_connect(self, _) -> None:
