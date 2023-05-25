@@ -92,7 +92,7 @@ class AutoTokClient(TikTokLiveClient):
             except LiveNotFound:
                 print(f"User `@{self.unique_id}` seems to be offline, retrying after 1 minute...")
 
-                sleep(1)
+                sleep(60)
             
             except KeyboardInterrupt:
                 print("`CTRL + C`, quitting...")

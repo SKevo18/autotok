@@ -19,12 +19,12 @@ def listen(username: str, upload: bool=True) -> None:
 
 
 @CLI.command()
-def upload(video_path: Path, title: str, category_id: int=24, tags: list[str]=[], playlist_id: t.Optional[str]=None, description: t.Optional[t.Text]=None) -> None:
+def upload(video_path: Path, title: t.Optional[str]=None, category_id: int=24, tags: list[str]=[], playlist_id: t.Optional[str]=None, description: t.Optional[t.Text]=None) -> None:
     print("Uploading...")
 
     video_id = upload_to_youtube(
         video_path=video_path,
-        title=title,
+        title=title if title is not None else video_path.stem,
         description=description if description is not None else '',
         category_id=category_id,
         tags=tags,
