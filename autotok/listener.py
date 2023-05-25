@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-from time import sleep
+import asyncio
+
 from pathlib import Path
 from warnings import warn
 
@@ -11,15 +12,24 @@ from autotok.uploader import upload_to_youtube
 
 
 
-class TikTokDownloadClient(TikTokLiveClient):
-    def __init__(self, unique_id: str, *args, **kwargs) -> None:
+class AutoTokClient(TikTokLiveClient):
+    def __init__(self, unique_id: str, upload: bool=True, *args, **kwargs) -> None:
         super().__init__(unique_id=unique_id, *args, **kwargs)
 
         self.add_listener("connect", self.on_connect)
         self.add_listener("disconnect", self.on_disconnect)
         self.add_listener("error", self.on_error)
 
+        self.datetime_str = now()
         self.update_filename()
+
+        self.upload = upload
+        self.youtube_kwargs = {
+            "title": f"{self.unique_id} - {self.datetime_str.split('_')[0].replace('-', '/')}",
+            "description": '',
+            "category_id": 24,
+            "tags": [self.unique_id],
+        }
 
 
 
@@ -28,12 +38,10 @@ class TikTokDownloadClient(TikTokLiveClient):
         return DOWNLOADS_ROOT / self.unique_id / self.filename
 
 
-
     def update_filename(self) -> str:
-        self.filename = f"{now()}_UTC.avi"
+        self.filename = f"{self.datetime_str}_UTC.avi"
 
         return self.filename
-
 
 
     def terminate(self) -> None:
@@ -44,9 +52,11 @@ class TikTokDownloadClient(TikTokLiveClient):
 
         self.stop()
 
-        # TODO:
-        upload_to_youtube(self.download_path)
-
+        if self.upload:
+            upload_to_youtube(
+                video_path=self.download_path,
+                **self.youtube_kwargs
+            )
 
 
     async def on_connect(self, _) -> None:
@@ -65,28 +75,16 @@ class TikTokDownloadClient(TikTokLiveClient):
         print("Disconnected. Saving & uploading current video and attempting to reconnect...")
         self.terminate()
 
-        return self.main()
+        return await self.start()
 
 
 
-    def main(self) -> None:
-        try:
-            return self.run()
+    async def main(self):
+        while not self.connected:
+            try:
+                await self.start()
 
-        except LiveNotFound:
-            warn(f"User `@{self.unique_id}` seems to be offline, retrying in 1 minute...")
-            self.stop()
+            except LiveNotFound:
+                print(f"User `@{self.unique_id}` seems to be offline, retrying after 1 minute...")
 
-            sleep(60)
-
-            return self.main()
-
-        except KeyboardInterrupt:
-            warn("`CTRL + C` detected, terminating...")
-            self.terminate()
-            print("ok!")
-
-
-
-if __name__ == '__main__':
-    TikTokDownloadClient('username').main()
+                await asyncio.sleep(60)
