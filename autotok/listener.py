@@ -5,6 +5,7 @@ from warnings import warn
 
 from TikTokLive import TikTokLiveClient
 from TikTokLive.types.errors import LiveNotFound
+from TikTokLive.types.objects import VideoQuality
 
 from autotok import DOWNLOADS_ROOT, now
 from autotok.uploader import upload_to_youtube
@@ -69,7 +70,7 @@ class AutoTokClient(TikTokLiveClient):
 
         self.download_path.parent.mkdir(parents=True, exist_ok=True)
 
-        self.download(path=self.download_path) # type: ignore
+        self.download(path=self.download_path, quality=VideoQuality.UHD) # type: ignore
 
 
     async def on_error(self, error: Exception) -> None:
