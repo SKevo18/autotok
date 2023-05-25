@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-from time import sleep
+import asyncio
+
 from pathlib import Path
 from warnings import warn
 
@@ -78,26 +79,21 @@ class AutoTokClient(TikTokLiveClient):
 
 
     async def on_disconnect(self, _) -> None:
-        print("Disconnected. Saving & uploading current video and attempting to reconnect...")
+        print("Disconnected. Saving current video and attempting to reconnect...")
         self.terminate()
 
-        return await self.start()
+        return await self.main()
 
 
 
-    def main(self):
+    async def main(self):
         while not self.connected:
             try:
-                self.run()
+                await self.start()
 
             except LiveNotFound:
                 print(f"User `@{self.unique_id}` seems to be offline, retrying after 1 minute...")
 
-                sleep(60)
-            
-            except KeyboardInterrupt:
-                print("`CTRL + C`, quitting...")
-                self.terminate()
+                await asyncio.sleep(60)
 
-                print("Exitted successfuly!")
-                break
+        print("Connected!")

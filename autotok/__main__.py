@@ -1,7 +1,9 @@
 import typing as t
 import typer
+import asyncio
 
 from pathlib import Path
+from functools import wraps
 
 from autotok.listener import AutoTokClient
 from autotok.uploader import upload_to_youtube
@@ -10,17 +12,36 @@ from autotok.uploader import upload_to_youtube
 CLI = typer.Typer()
 
 
+def run_async(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        async def coro_wrapper():
+            return await func(*args, **kwargs)
+
+        return asyncio.run(coro_wrapper())
+
+    return wrapper
+
+
 
 @CLI.command()
-def listen(username: str, upload: bool=True) -> None:
+@run_async
+async def listen(username: str, upload: bool=True) -> None:
     client = AutoTokClient(unique_id=username, upload=upload)
 
-    return client.main()
+    try:
+        await client.main()
+
+    except (KeyboardInterrupt, asyncio.exceptions.CancelledError):
+        print("`CTRL + C`, quitting...")
+        client.terminate()
+
+        return print("Exitted successfuly!")
 
 
 @CLI.command()
 def upload(video_path: Path, title: t.Optional[str]=None, category_id: int=24, tags: list[str]=[], playlist_id: t.Optional[str]=None, description: t.Optional[t.Text]=None) -> None:
-    print("Uploading...")
+    print(f"Uploading `{video_path.name}` to YouTube...")
 
     video_id = upload_to_youtube(
         video_path=video_path,
