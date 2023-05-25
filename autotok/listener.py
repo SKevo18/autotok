@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-import asyncio
-
+from time import sleep
 from pathlib import Path
 from warnings import warn
 
@@ -25,10 +24,10 @@ class AutoTokClient(TikTokLiveClient):
 
         self.upload = upload
         self.youtube_kwargs = {
-            "title": f"{self.unique_id} - {self.datetime_str.split('_')[0].replace('-', '/')}",
-            "description": '',
+            "title": f"{self.unique_id} - auto-playback {self.datetime_str.split('_')[0].replace('-', '/')}",
+            "description": f'https://tiktok.com/@{self.unique_id}',
             "category_id": 24,
-            "tags": [self.unique_id],
+            "tags": [self.unique_id, 'auto'],
         }
 
 
@@ -85,12 +84,19 @@ class AutoTokClient(TikTokLiveClient):
 
 
 
-    async def main(self):
+    def main(self):
         while not self.connected:
             try:
-                await self.start()
+                self.run()
 
             except LiveNotFound:
                 print(f"User `@{self.unique_id}` seems to be offline, retrying after 1 minute...")
 
-                await asyncio.sleep(60)
+                sleep(1)
+            
+            except KeyboardInterrupt:
+                print("`CTRL + C`, quitting...")
+                self.terminate()
+
+                print("Exitted successfuly!")
+                break

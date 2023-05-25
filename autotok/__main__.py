@@ -1,41 +1,25 @@
 import typing as t
-
 import typer
-import anyio
 
 from pathlib import Path
-from functools import wraps
 
 from autotok.listener import AutoTokClient
 from autotok.uploader import upload_to_youtube
 
 
-
-def run_async(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        async def coro_wrapper():
-            return await func(*args, **kwargs)
-
-        return anyio.run(coro_wrapper)
-
-    return wrapper
-
-
-
 CLI = typer.Typer()
 
 
-@CLI.command()
-@run_async
-async def listen(username: str, upload: bool=True) -> None:
-    return await AutoTokClient(unique_id=username, upload=upload).main()
-
-
 
 @CLI.command()
-@run_async
-async def upload(video_path: Path, title: str, category_id: int=24, tags: list[str]=[], playlist_id: t.Optional[str]=None, description: t.Optional[t.Text]=None) -> None:
+def listen(username: str, upload: bool=True) -> None:
+    client = AutoTokClient(unique_id=username, upload=upload)
+
+    return client.main()
+
+
+@CLI.command()
+def upload(video_path: Path, title: str, category_id: int=24, tags: list[str]=[], playlist_id: t.Optional[str]=None, description: t.Optional[t.Text]=None) -> None:
     print("Uploading...")
 
     video_id = upload_to_youtube(

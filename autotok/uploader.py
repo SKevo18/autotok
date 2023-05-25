@@ -68,6 +68,7 @@ def upload_to_youtube(video_path: Path, title: str, description: t.Text, categor
 
 
     response = None
+
     while response is None:
         _, response = insert_request.next_chunk()
 
@@ -75,7 +76,7 @@ def upload_to_youtube(video_path: Path, title: str, description: t.Text, categor
     if response is not None:
         if video_id := response.get('id', None):
             if playlist_id is not None:
-                add_video_request = youtube.playlistItems().insert( # type: ignore
+                added_playlist = youtube.playlistItems().insert( # type: ignore
                     part="snippet",
                     body={
                         "snippet": {
@@ -87,8 +88,10 @@ def upload_to_youtube(video_path: Path, title: str, description: t.Text, categor
                         }
                     }
                 ).execute()
-                
-                return video_id
+
+                print(f"Added video to playlist `{added_playlist['id']}`")
+
+            return video_id
 
         else:
             warn(f"The upload failed with an unexpected response: {response}")
