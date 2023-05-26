@@ -55,7 +55,7 @@ def upload_to_youtube(video_path: Path, title: str, description: t.Text, categor
             "categoryId": category_id
         },
         "status": {
-            "privacyStatus": 'public'
+            "privacyStatus": 'private'
         }
     }
   
