@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 import asyncio
+import traceback
 
 from pathlib import Path
 from warnings import warn
 
 from TikTokLive import TikTokLiveClient
-from TikTokLive.types.errors import LiveNotFound
 from TikTokLive.types.objects import VideoQuality
+from TikTokLive.types.errors import LiveNotFound, FailedFetchRoomInfo
 
 from autotok import DOWNLOADS_ROOT, now
 from autotok.uploader import upload_to_youtube
@@ -92,8 +93,14 @@ class AutoTokClient(TikTokLiveClient):
                 await self.start()
 
             except LiveNotFound:
-                print(f"User `@{self.unique_id}` seems to be offline, retrying after 1 minute...")
+                print(f"User `@{self.unique_id}` seems to be offline, checking again in 1 minute...")
 
                 await asyncio.sleep(60)
+            
+            except Exception as e:
+                print(traceback.print_exc())
+                print(f"Failed to do something: {e}, retrying after 10 seconds...")
 
-        print("Connected!")
+                await asyncio.sleep(10)
+
+        print("Finally, at last, connected!")
