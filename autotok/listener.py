@@ -7,7 +7,7 @@ from warnings import warn
 
 from TikTokLive import TikTokLiveClient
 from TikTokLive.types.objects import VideoQuality
-from TikTokLive.types.errors import LiveNotFound, FailedFetchRoomInfo
+from TikTokLive.types.errors import LiveNotFound, FailedFetchRoomInfo, AlreadyConnecting
 
 from autotok import DOWNLOADS_ROOT, now
 from autotok.uploader import upload_to_youtube
@@ -56,7 +56,7 @@ class AutoTokClient(TikTokLiveClient):
 
         self.stop()
 
-        if self.upload:
+        if self.upload and self.download_path.exists():
             print("Uploading to YouTube...")
 
             video_id = upload_to_youtube(
@@ -88,7 +88,7 @@ class AutoTokClient(TikTokLiveClient):
 
 
     async def main(self):
-        while not self.connected and not self.connecting:
+        while not self.connected or not self.connecting:
             try:
                 await self.start()
 
@@ -96,7 +96,13 @@ class AutoTokClient(TikTokLiveClient):
                 print(f"User `@{self.unique_id}` seems to be offline, checking again in 1 minute...")
 
                 await asyncio.sleep(60)
-            
+
+            except AlreadyConnecting as e:
+                print("shitte, have to wait 10 secs:", e)
+
+                self.stop()
+                await asyncio.sleep(10)
+
             except Exception as e:
                 print(traceback.print_exc())
                 print(f"Failed to do something: {e}, retrying after 10 seconds...")
