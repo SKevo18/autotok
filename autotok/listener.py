@@ -98,7 +98,7 @@ class AutoTokClient(TikTokLiveClient):
                 await asyncio.sleep(60)
 
             except AlreadyConnecting as e:
-                print("shitte, have to wait 10 secs:", e)
+                print("shitte, we wait:", e)
 
                 self.stop()
                 await asyncio.sleep(10)
