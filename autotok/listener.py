@@ -7,7 +7,7 @@ from warnings import warn
 
 from TikTokLive import TikTokLiveClient
 from TikTokLive.types.objects import VideoQuality
-from TikTokLive.types.errors import LiveNotFound, FailedFetchRoomInfo, AlreadyConnecting
+from TikTokLive.types.errors import LiveNotFound, AlreadyConnecting
 
 from autotok import DOWNLOADS_ROOT, now
 from autotok.uploader import upload_to_youtube
