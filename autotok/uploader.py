@@ -11,7 +11,7 @@ from google.auth.transport.requests import Request
 from google.auth.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 
-from autotok import MODULE_ROOT
+from autotok import LOGGER, MODULE_ROOT
 
 
 SCOPES = ['https://www.googleapis.com/auth/youtube.upload']
@@ -89,12 +89,10 @@ def upload_to_youtube(video_path: Path, title: str, description: t.Text, categor
                     }
                 ).execute()
 
-                print(f"Added video to playlist `{added_playlist['id']}`")
-
             return video_id
 
         else:
-            warn(f"The upload failed with an unexpected response: {response}")
+            LOGGER.error(f"The upload failed with an unexpected response: {response}")
 
 
 

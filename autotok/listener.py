@@ -9,7 +9,7 @@ from TikTokLive import TikTokLiveClient
 from TikTokLive.types.objects import VideoQuality
 from TikTokLive.types.errors import LiveNotFound, AlreadyConnecting
 
-from autotok import DOWNLOADS_ROOT, now
+from autotok import LOGGER, DOWNLOADS_ROOT, now
 from autotok.uploader import upload_to_youtube
 
 
@@ -47,28 +47,28 @@ class AutoTokClient(TikTokLiveClient):
 
 
     def terminate(self) -> None:
-        print("Stopping...")
+        LOGGER.info("Stopping...")
 
         try:
             self.stop_download()
         except Exception as e:
-            warn(f"Error during `stop_download`: {e}")
+            LOGGER.error(f"Error during `stop_download`: {e}")
 
         self.stop()
 
         if self.upload and self.download_path.exists():
-            print("Uploading to YouTube...")
+            LOGGER.info("Uploading to YouTube...")
 
             video_id = upload_to_youtube(
                 video_path=self.download_path,
                 **self.youtube_kwargs
             )
 
-            print(f"Video ID `{video_id}` was uploaded successfuly: https://youtube.com/watch?v={video_id}")
+            LOGGER.info(f"Video ID `{video_id}` was uploaded successfuly: https://youtube.com/watch?v={video_id}")
 
 
     async def on_connect(self, _) -> None:
-        print(f"Connected to room '{self.room_id}' (https://tiktok.com/@{self.unique_id}/live)")
+        LOGGER.info(f"Connected to room '{self.room_id}' (https://tiktok.com/@{self.unique_id}/live)")
 
         self.download_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -76,11 +76,11 @@ class AutoTokClient(TikTokLiveClient):
 
 
     async def on_error(self, error: Exception) -> None:
-        warn(str(error))
+        LOGGER.error(error, exc_info=True)
 
 
     async def on_disconnect(self, _) -> None:
-        print("Disconnected. Saving current video and attempting to reconnect...")
+        LOGGER.warning("Disconnected. Saving current video and attempting to reconnect...")
         self.terminate()
 
         return await self.main()
@@ -93,20 +93,20 @@ class AutoTokClient(TikTokLiveClient):
                 await self.start()
 
             except LiveNotFound:
-                print(f"User `@{self.unique_id}` seems to be offline, checking again in 1 minute...")
+                LOGGER.info(f"User `@{self.unique_id}` seems to be offline, checking again in 1 minute...")
 
                 await asyncio.sleep(60)
 
             except AlreadyConnecting as e:
-                print("shitte, we wait:", e)
+                LOGGER.error("shitte, we wait:", e, exc_info=True)
 
                 self.stop()
                 await asyncio.sleep(10)
 
             except Exception as e:
                 print(traceback.print_exc())
-                print(f"Failed to do something: {e}, retrying after 10 seconds...")
+                LOGGER.error("Failed to do something: `", e, "`. Retrying after 10 seconds...", exc_info=True)
 
                 await asyncio.sleep(10)
 
-        print("Finally, at last, connected!")
+        LOGGER.info("Finally, at last, connected!")
