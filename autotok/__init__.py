@@ -26,7 +26,7 @@ LOGGING_HANDLERS: list[logging.Handler] = [
 
 
 LOGGER = logging.getLogger(MODULE_ROOT.stem)
-LOGGER.setLevel(logging.INFO)
+LOGGER.setLevel(logging.DEBUG)
 
 for handler in LOGGING_HANDLERS:
     handler.setFormatter(logging.Formatter('%(name)s (%(asctime)s) [%(levelname)s]: %(message)s'))

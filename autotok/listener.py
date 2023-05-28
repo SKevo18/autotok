@@ -92,7 +92,7 @@ class AutoTokClient(TikTokLiveClient):
                 await self.start()
 
             except LiveNotFound:
-                LOGGER.info(f"User `@{self.unique_id}` seems to be offline, checking again in 1 minute...")
+                LOGGER.debug(f"User `@{self.unique_id}` seems to be offline, checking again in 1 minute...")
 
                 await asyncio.sleep(60)
 
