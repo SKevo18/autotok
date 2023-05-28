@@ -3,11 +3,10 @@ import asyncio
 import traceback
 
 from pathlib import Path
-from warnings import warn
 
 from TikTokLive import TikTokLiveClient
 from TikTokLive.types.objects import VideoQuality
-from TikTokLive.types.errors import LiveNotFound, AlreadyConnecting
+from TikTokLive.types.errors import LiveNotFound
 
 from autotok import LOGGER, DOWNLOADS_ROOT, now
 from autotok.uploader import upload_to_youtube
@@ -52,19 +51,19 @@ class AutoTokClient(TikTokLiveClient):
         try:
             self.stop_download()
         except Exception as e:
-            LOGGER.error(f"Error during `stop_download`: {e}")
+            LOGGER.error(f"`@{self.unique_id}` - Error during `stop_download`: {e}")
 
         self.stop()
 
         if self.upload and self.download_path.exists():
-            LOGGER.info("Uploading to YouTube...")
+            LOGGER.info(f"`@{self.unique_id}` - Uploading to YouTube...")
 
             video_id = upload_to_youtube(
                 video_path=self.download_path,
                 **self.youtube_kwargs
             )
 
-            LOGGER.info(f"Video ID `{video_id}` was uploaded successfuly: https://youtube.com/watch?v={video_id}")
+            LOGGER.info(f"`@{self.unique_id}` - Video ID `{video_id}` was uploaded successfuly: https://youtube.com/watch?v={video_id}")
 
 
     async def on_connect(self, _) -> None:
@@ -80,7 +79,7 @@ class AutoTokClient(TikTokLiveClient):
 
 
     async def on_disconnect(self, _) -> None:
-        LOGGER.warning("Disconnected. Saving current video and attempting to reconnect...")
+        LOGGER.warning(f"`@{self.unique_id}` - Disconnected. Saving current video and attempting to reconnect...")
         self.terminate()
 
         return await self.main()
@@ -97,16 +96,10 @@ class AutoTokClient(TikTokLiveClient):
 
                 await asyncio.sleep(60)
 
-            except AlreadyConnecting as e:
-                LOGGER.error("shitte, we wait:", e, exc_info=True)
-
-                self.stop()
-                await asyncio.sleep(10)
-
             except Exception as e:
                 print(traceback.print_exc())
-                LOGGER.error("Failed to do something: `", e, "`. Retrying after 10 seconds...", exc_info=True)
+                LOGGER.error(f"`@{self.unique_id}` - Failed to do something: `", e, "`. Retrying after 10 seconds...", exc_info=True)
 
                 await asyncio.sleep(10)
 
-        LOGGER.info("Finally, at last, connected!")
+        LOGGER.info(f"`@{self.unique_id}` - Finally, at last, connected!")

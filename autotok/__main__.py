@@ -26,17 +26,19 @@ def run_async(func):
 
 @CLI.command()
 @run_async
-async def listen(username: str, upload: bool=True) -> None:
-    client = AutoTokClient(unique_id=username, upload=upload)
+async def listen(usernames: list[str], upload: bool=True) -> None:
+    clients = [AutoTokClient(unique_id=username, upload=upload) for username in usernames]
 
     try:
-        await client.main()
+        await asyncio.gather(*[client.main() for client in clients])
 
     except (KeyboardInterrupt, asyncio.exceptions.CancelledError):
         print("`CTRL + C`, quitting...")
-        client.terminate()
 
-        return print("Exitted successfuly!")
+        for client in clients:
+            client.terminate()
+            print(f"`@{client.unique_id}` exitted successfully!")
+
 
 
 @CLI.command()

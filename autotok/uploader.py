@@ -92,7 +92,7 @@ def upload_to_youtube(video_path: Path, title: str, description: t.Text, categor
             return video_id
 
         else:
-            LOGGER.error(f"The upload failed with an unexpected response: {response}")
+            LOGGER.error(f"`{video_path}` - The upload failed with an unexpected response: {response}")
 
 
 
