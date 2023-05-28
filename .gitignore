@@ -6,4 +6,4 @@ downloads/
 client_secret.json
 token.pickle
 
-*.log
+**/logs/
