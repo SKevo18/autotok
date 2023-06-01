@@ -26,8 +26,8 @@ class AutoTokClient(TikTokLiveClient):
 
         self.upload = upload
         self.youtube_kwargs = {
-            "title": f"{self.unique_id} - auto-playback {self.datetime_str.split('_')[0].replace('-', '/')}",
-            "description": f'https://tiktok.com/@{self.unique_id}',
+            "title": f"{self.unique_id} ({self.datetime_str.split('_')[0].replace('-', '/')})",
+            "description": f'https://tiktok.com/@{self.unique_id}\n\nAutomatický záznam z {self.datetime_str}',
             "category_id": 24,
             "tags": [self.unique_id, 'auto'],
         }
@@ -47,12 +47,6 @@ class AutoTokClient(TikTokLiveClient):
 
     def terminate(self) -> None:
         LOGGER.info("Stopping...")
-
-        try:
-            self.stop_download()
-        except Exception as e:
-            LOGGER.error(f"`@{self.unique_id}` - Error during `stop_download`: {e}")
-
         self.stop()
 
         if self.upload and self.download_path.exists():
