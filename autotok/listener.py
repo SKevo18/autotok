@@ -27,7 +27,7 @@ class AutoTokClient(TikTokLiveClient):
         self.upload = upload
         self.youtube_kwargs = {
             "title": f"{self.unique_id} ({self.datetime_str.split('_')[0].replace('-', '/')})",
-            "description": f'https://tiktok.com/@{self.unique_id}\n\nAutomatický záznam z {self.datetime_str}',
+            "description": f'https://tiktok.com/@{self.unique_id}\n\nAutomatic recording from {self.datetime_str}',
             "category_id": 24,
             "tags": [self.unique_id, 'auto'],
         }
