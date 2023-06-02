@@ -82,7 +82,7 @@ class AutoTokClient(TikTokLiveClient):
 
 
 
-    async def main(self):
+    async def main(self) -> None:
         while not self.connected or not self.connecting:
             try:
                 await self.start()
