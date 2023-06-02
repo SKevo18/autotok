@@ -21,8 +21,7 @@ class AutoTokClient(TikTokLiveClient):
         self.add_listener("disconnect", self.on_disconnect)
         self.add_listener("error", self.on_error)
 
-        self.datetime_str = now()
-        self.update_filename()
+        self.update_time()
 
         self.upload = upload
         self.youtube_kwargs = {
@@ -39,7 +38,8 @@ class AutoTokClient(TikTokLiveClient):
         return DOWNLOADS_ROOT / self.unique_id / self.filename
 
 
-    def update_filename(self) -> str:
+    def update_time(self) -> str:
+        self.datetime_str = now()
         self.filename = f"{self.datetime_str}_UTC.avi"
 
         return self.filename
@@ -65,6 +65,8 @@ class AutoTokClient(TikTokLiveClient):
 
         self.download_path.parent.mkdir(parents=True, exist_ok=True)
 
+        self.update_time()
+        LOGGER.info(f"`@{self.room_id}` - Started downloading `{self.download_path.stem}`")
         self.download(path=self.download_path, quality=VideoQuality.UHD) # type: ignore
 
 
